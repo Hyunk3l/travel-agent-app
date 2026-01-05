@@ -26,6 +26,14 @@ ollama pull llama3.1
 python -m travel_agent --origin SFO --destination LAX --depart 2025-01-10 --return 2025-01-14 --hotel
 ```
 
+Run from a local venv:
+
+```bash
+source .venv/bin/activate
+pip install -e .
+OLLAMA_HOST=http://localhost:11434 OLLAMA_MODEL=llama3.1 travel-agent --origin SFO --destination LAX --depart 2025-01-10
+```
+
 Or install and run:
 
 ```bash
