@@ -1,13 +1,16 @@
 from dataclasses import dataclass
+from typing import Optional
 
 from strands import Agent
+from strands.models.ollama import OllamaModel
 
 
 @dataclass
 class OrchestratorAgent:
-    def build(self) -> Agent:
+    def build(self, model: Optional[OllamaModel] = None) -> Agent:
         return Agent(
             name="orchestrator",
+            model=model,
             system_prompt=(
                 "You are a travel request orchestrator. Read the user request and "
                 "decide which services are needed. Reply with strict JSON like: "
@@ -19,9 +22,10 @@ class OrchestratorAgent:
 
 @dataclass
 class FlightSearchAgent:
-    def build(self) -> Agent:
+    def build(self, model: Optional[OllamaModel] = None) -> Agent:
         return Agent(
             name="flight_search",
+            model=model,
             system_prompt=(
                 "You search flights. Given the request, return a JSON array of "
                 "3 flight options with keys: carrier, flight, route, depart, "
@@ -32,9 +36,10 @@ class FlightSearchAgent:
 
 @dataclass
 class HotelSearchAgent:
-    def build(self) -> Agent:
+    def build(self, model: Optional[OllamaModel] = None) -> Agent:
         return Agent(
             name="hotel_search",
+            model=model,
             system_prompt=(
                 "You search hotels. Given the request, return a JSON array of "
                 "3 hotel options with keys: name, city, checkout, price_usd_per_night."

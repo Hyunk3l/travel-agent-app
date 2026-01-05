@@ -1,8 +1,10 @@
 import json
+import os
 from typing import Any, Dict
 
 from strands.multiagent import GraphBuilder
 from strands.multiagent.graph import GraphState
+from strands.models.ollama import OllamaModel
 
 from travel_agent.agents import FlightSearchAgent, HotelSearchAgent, OrchestratorAgent
 
@@ -47,11 +49,18 @@ def _needs_hotel(state: GraphState) -> bool:
     return "hotel" in payload.get("raw", "").lower()
 
 
+def _build_model() -> OllamaModel:
+    host = os.getenv("OLLAMA_HOST", "http://localhost:11434")
+    model_id = os.getenv("OLLAMA_MODEL", "llama3.1")
+    return OllamaModel(host=host, model_id=model_id)
+
+
 def build_graph():
+    model = _build_model()
     builder = GraphBuilder()
-    builder.add_node(OrchestratorAgent().build(), "orchestrator")
-    builder.add_node(FlightSearchAgent().build(), "flight_search")
-    builder.add_node(HotelSearchAgent().build(), "hotel_search")
+    builder.add_node(OrchestratorAgent().build(model), "orchestrator")
+    builder.add_node(FlightSearchAgent().build(model), "flight_search")
+    builder.add_node(HotelSearchAgent().build(model), "hotel_search")
 
     builder.add_edge("orchestrator", "flight_search", condition=_needs_flight)
     builder.add_edge("orchestrator", "hotel_search", condition=_needs_hotel)

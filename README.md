@@ -7,10 +7,17 @@ SDK and its "Graph pattern." The graph connects three agents:
 - Flight search agent
 - Hotel search agent
 
-Install the SDK with:
+Install the SDK with Ollama support:
 
 ```bash
-pip install strands-agents
+pip install 'strands-agents[ollama]'
+```
+
+Start Ollama and pull a model:
+
+```bash
+ollama serve
+ollama pull llama3.1
 ```
 
 ## Quick start
@@ -24,6 +31,12 @@ Or install and run:
 ```bash
 pip install -e .
 travel-agent --origin SFO --destination LAX --depart 2025-01-10 --return 2025-01-14 --hotel
+```
+
+You can override the Ollama host or model:
+
+```bash
+OLLAMA_HOST=http://localhost:11434 OLLAMA_MODEL=llama3.1 travel-agent --origin SFO --destination LAX --depart 2025-01-10
 ```
 
 ## What it does
