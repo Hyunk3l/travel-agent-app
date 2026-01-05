@@ -20,6 +20,15 @@ def _result_text(node_result: Any) -> str:
     return str(result) if result is not None else ""
 
 
+def _json_safe(value: Any) -> Any:
+    if value is None:
+        return None
+    enum_value = getattr(value, "value", None)
+    if enum_value is not None:
+        return enum_value
+    return str(value)
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Travel agent demo.")
     parser.add_argument("--origin", default=None, help="Origin airport or city.")
@@ -55,7 +64,7 @@ def main() -> None:
     graph = build_graph()
     result = graph(state["request"])
     output: Dict[str, Any] = {
-        "status": getattr(result, "status", None),
+        "status": _json_safe(getattr(result, "status", None)),
         "execution_time_ms": getattr(result, "execution_time", None),
         "execution_order": [
             getattr(node, "node_id", None)
