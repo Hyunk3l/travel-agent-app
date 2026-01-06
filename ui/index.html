@@ -124,10 +124,56 @@
         line-height: 1.6;
       }
 
+      .result-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 14px;
+        margin-top: 14px;
+      }
+
+      .result-card {
+        border-radius: 16px;
+        border: 1px solid rgba(192, 90, 46, 0.2);
+        padding: 14px;
+        background: #fff7ec;
+      }
+
+      .result-card h4 {
+        margin: 0 0 8px;
+        font-size: 0.95rem;
+      }
+
+      .result-card p {
+        margin: 0 0 6px;
+        color: var(--muted);
+        font-size: 0.9rem;
+      }
+
+      .result-card span {
+        font-weight: 600;
+        color: var(--ink);
+      }
+
+      .section-title {
+        font-weight: 600;
+        font-size: 0.95rem;
+        margin-top: 16px;
+        margin-bottom: 8px;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+      }
+
       .meta {
         color: var(--muted);
         font-size: 0.9rem;
         margin-top: 12px;
+      }
+
+      .query {
+        color: var(--muted);
+        font-size: 0.95rem;
+        margin-bottom: 10px;
       }
 
       .chips {
@@ -175,7 +221,10 @@
 
         <section class="card">
           <label>Response</label>
-          <div class="answer" id="answer">Waiting for a request.</div>
+          <div class="query" id="query">Waiting for a request.</div>
+          <div class="answer" id="answer"></div>
+          <div id="flights"></div>
+          <div id="hotels"></div>
           <div class="meta" id="meta"></div>
         </section>
       </div>
@@ -183,12 +232,49 @@
 
     <script>
       const statusEl = document.getElementById("status");
+      const queryEl = document.getElementById("query");
       const answerEl = document.getElementById("answer");
       const metaEl = document.getElementById("meta");
       const promptEl = document.getElementById("prompt");
+      const flightsEl = document.getElementById("flights");
+      const hotelsEl = document.getElementById("hotels");
 
       function setStatus(text) {
         statusEl.textContent = text;
+      }
+
+      function renderCards(items, type) {
+        if (!Array.isArray(items) || items.length === 0) {
+          return "";
+        }
+        const title = type === "flight" ? "Flights" : "Hotels";
+        const cards = items
+          .map((item) => {
+            if (type === "flight") {
+              return `
+                <div class="result-card">
+                  <h4>${item.carrier || "Carrier"} <span>${item.flight || ""}</span></h4>
+                  <p><span>Route:</span> ${item.route || "—"}</p>
+                  <p><span>Depart:</span> ${item.depart || "—"}</p>
+                  <p><span>Return:</span> ${item.return || "—"}</p>
+                  <p><span>Price:</span> $${item.price_usd || "—"}</p>
+                </div>
+              `;
+            }
+            return `
+              <div class="result-card">
+                <h4>${item.name || "Hotel"}</h4>
+                <p><span>City:</span> ${item.city || "—"}</p>
+                <p><span>Checkout:</span> ${item.checkout || "—"}</p>
+                <p><span>Price:</span> $${item.price_usd_per_night || "—"} / night</p>
+              </div>
+            `;
+          })
+          .join("");
+        return `
+          <div class="section-title">${title}</div>
+          <div class="result-grid">${cards}</div>
+        `;
       }
 
       document.getElementById("send").addEventListener("click", async () => {
@@ -198,7 +284,10 @@
         }
         setStatus("Thinking...");
         answerEl.textContent = "";
+        queryEl.textContent = "";
         metaEl.textContent = "";
+        flightsEl.innerHTML = "";
+        hotelsEl.innerHTML = "";
         try {
           const response = await fetch("/chat", {
             method: "POST",
@@ -209,7 +298,17 @@
             throw new Error(`Request failed with ${response.status}`);
           }
           const payload = await response.json();
-          answerEl.textContent = payload.answer || "No response.";
+          const query = payload.query ? `Query: ${payload.query}` : "";
+          queryEl.textContent = query || "Query: not available";
+          const flights = payload.flights || [];
+          const hotels = payload.hotels || [];
+          flightsEl.innerHTML = renderCards(flights, "flight");
+          hotelsEl.innerHTML = renderCards(hotels, "hotel");
+          if (!flights.length && !hotels.length) {
+            answerEl.textContent = payload.answer || "No structured results.";
+          } else {
+            answerEl.textContent = "";
+          }
           const status = payload.status ? `Status: ${payload.status}` : "Status: unknown";
           const timing = payload.execution_time_ms
             ? `Time: ${Math.round(payload.execution_time_ms)} ms`

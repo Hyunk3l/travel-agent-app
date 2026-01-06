@@ -1,5 +1,6 @@
 import json
 import os
+import re
 from pathlib import Path
 from typing import Any, Dict, Optional
 
@@ -54,11 +55,20 @@ def _json_safe(value: Any) -> Any:
     return str(value)
 
 
-def _parse_json(text: str) -> Optional[Dict[str, Any]]:
-    try:
-        return json.loads(text)
-    except json.JSONDecodeError:
+def _parse_json(text: str) -> Optional[Any]:
+    if not text:
         return None
+    fence_match = re.search(r"```json\s*([\s\S]*?)```", text, re.IGNORECASE)
+    raw = fence_match.group(1) if fence_match else text
+    decoder = json.JSONDecoder()
+    for idx, char in enumerate(raw):
+        if char in "{[":
+            try:
+                value, _ = decoder.raw_decode(raw[idx:])
+                return value
+            except json.JSONDecodeError:
+                continue
+    return None
 
 
 def ask(message: str) -> Dict[str, Any]:
@@ -80,9 +90,15 @@ def ask(message: str) -> Dict[str, Any]:
 
     flight_text = results.get("flight_search")
     hotel_text = results.get("hotel_search")
-    if flight_text:
+    flights = _parse_json(flight_text) if flight_text else None
+    hotels = _parse_json(hotel_text) if hotel_text else None
+    if flights:
+        sections.append("Flights:\n" + json.dumps(flights, indent=2))
+    elif flight_text:
         sections.append("Flights:\n" + flight_text)
-    if hotel_text:
+    if hotels:
+        sections.append("Hotels:\n" + json.dumps(hotels, indent=2))
+    elif hotel_text:
         sections.append("Hotels:\n" + hotel_text)
 
     if sections:
@@ -96,6 +112,8 @@ def ask(message: str) -> Dict[str, Any]:
         "answer": answer or "",
         "query": query,
         "orchestrator": orchestrator_payload,
+        "flights": flights,
+        "hotels": hotels,
         "status": _json_safe(getattr(result, "status", None)),
         "execution_time_ms": getattr(result, "execution_time", None),
         "results": results,
