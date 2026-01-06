@@ -1,3 +1,4 @@
+import json
 import os
 from pathlib import Path
 from typing import Any, Dict, Optional
@@ -53,18 +54,48 @@ def _json_safe(value: Any) -> Any:
     return str(value)
 
 
+def _parse_json(text: str) -> Optional[Dict[str, Any]]:
+    try:
+        return json.loads(text)
+    except json.JSONDecodeError:
+        return None
+
+
 def ask(message: str) -> Dict[str, Any]:
     result = _graph(message)
     results: Dict[str, str] = {}
     for node_id, node_result in getattr(result, "results", {}).items():
         results[node_id] = _result_text(node_result)
 
-    answer = results.get("orchestrator")
-    if not answer:
+    orchestrator_payload = None
+    orchestrator_text = results.get("orchestrator", "")
+    if orchestrator_text:
+        orchestrator_payload = _parse_json(orchestrator_text)
+
+    sections = []
+    query = None
+    if orchestrator_payload and "query" in orchestrator_payload:
+        query = str(orchestrator_payload["query"])
+        sections.append(f"Query: {query}")
+
+    flight_text = results.get("flight_search")
+    hotel_text = results.get("hotel_search")
+    if flight_text:
+        sections.append("Flights:\n" + flight_text)
+    if hotel_text:
+        sections.append("Hotels:\n" + hotel_text)
+
+    if sections:
+        answer = "\n\n".join(sections)
+    elif orchestrator_text:
+        answer = orchestrator_text
+    else:
         answer = "\n\n".join(text for text in results.values() if text)
 
     return {
         "answer": answer or "",
+        "query": query,
+        "orchestrator": orchestrator_payload,
         "status": _json_safe(getattr(result, "status", None)),
         "execution_time_ms": getattr(result, "execution_time", None),
         "results": results,
