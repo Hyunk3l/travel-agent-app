@@ -191,6 +191,64 @@
         letter-spacing: 0.08em;
       }
 
+      .graph {
+        display: grid;
+        gap: 12px;
+        margin-top: 12px;
+      }
+
+      .node {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px 14px;
+        border-radius: 14px;
+        border: 1px solid rgba(32, 27, 22, 0.12);
+        background: #fffefb;
+      }
+
+      .node-name {
+        font-weight: 600;
+      }
+
+      .node-status {
+        font-size: 0.85rem;
+        color: var(--muted);
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #e1d2c3;
+      }
+
+      .node.running {
+        border-color: rgba(192, 90, 46, 0.4);
+        background: #fff4e7;
+      }
+
+      .node.running .dot {
+        background: var(--accent);
+        animation: pulse 1.4s infinite;
+      }
+
+      .node.done {
+        border-color: rgba(94, 140, 90, 0.35);
+        background: #f3fbf2;
+      }
+
+      .node.done .dot {
+        background: #5e8c5a;
+      }
+
+      .node.pending .dot {
+        background: #d8c9bb;
+      }
+
       .meta {
         color: var(--muted);
         font-size: 0.9rem;
@@ -246,6 +304,25 @@
         </section>
 
         <section class="card">
+          <label>Live architecture</label>
+          <div class="section-title">Graph</div>
+          <div class="graph" id="graph">
+            <div class="node pending" data-node="orchestrator">
+              <div class="node-name">Orchestrator</div>
+              <div class="node-status"><span class="dot"></span><span>idle</span></div>
+            </div>
+            <div class="node pending" data-node="flight_search">
+              <div class="node-name">Flight Search</div>
+              <div class="node-status"><span class="dot"></span><span>idle</span></div>
+            </div>
+            <div class="node pending" data-node="hotel_search">
+              <div class="node-name">Hotel Search</div>
+              <div class="node-status"><span class="dot"></span><span>idle</span></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="card">
           <label>Response</label>
           <div class="query" id="query">Waiting for a request.</div>
           <div class="status" id="status" style="display: none;">
@@ -269,6 +346,7 @@
       const promptEl = document.getElementById("prompt");
       const flightsEl = document.getElementById("flights");
       const hotelsEl = document.getElementById("hotels");
+      const graphEl = document.getElementById("graph");
 
       function setStatus(text, visible) {
         if (!visible) {
@@ -277,6 +355,31 @@
         }
         statusTextEl.textContent = text;
         statusEl.style.display = "inline-flex";
+      }
+
+      function setNodeState(nodeId, state, label) {
+        const node = graphEl.querySelector(`[data-node="${nodeId}"]`);
+        if (!node) {
+          return;
+        }
+        node.classList.remove("pending", "running", "done");
+        node.classList.add(state);
+        const statusText = node.querySelector(".node-status span:last-child");
+        if (statusText) {
+          statusText.textContent = label;
+        }
+      }
+
+      function resetGraph() {
+        setNodeState("orchestrator", "pending", "idle");
+        setNodeState("flight_search", "pending", "idle");
+        setNodeState("hotel_search", "pending", "idle");
+      }
+
+      function animateGraphStart() {
+        setNodeState("orchestrator", "running", "routing");
+        setTimeout(() => setNodeState("flight_search", "running", "queued"), 450);
+        setTimeout(() => setNodeState("hotel_search", "running", "queued"), 650);
       }
 
       function renderCards(items, type) {
@@ -319,6 +422,8 @@
           return;
         }
         setStatus("Thinking…", true);
+        resetGraph();
+        animateGraphStart();
         const startTime = performance.now();
         answerEl.textContent = "";
         queryEl.textContent = "";
@@ -352,12 +457,26 @@
           const timing = `Time: ${elapsedSec} s`;
           metaEl.textContent = `${status} | ${timing}`;
           setStatus("", false);
+          setNodeState("orchestrator", "done", "done");
+          if (flights.length) {
+            setNodeState("flight_search", "done", "done");
+          } else {
+            setNodeState("flight_search", "pending", "skipped");
+          }
+          if (hotels.length) {
+            setNodeState("hotel_search", "done", "done");
+          } else {
+            setNodeState("hotel_search", "pending", "skipped");
+          }
         } catch (error) {
           answerEl.textContent = "Error calling the agent.";
           const elapsedMs = Math.round(performance.now() - startTime);
           const elapsedSec = (elapsedMs / 1000).toFixed(1);
           metaEl.textContent = `${String(error)} | Time: ${elapsedSec} s`;
           setStatus("There was an error. Please try again.", true);
+          setNodeState("orchestrator", "pending", "error");
+          setNodeState("flight_search", "pending", "error");
+          setNodeState("hotel_search", "pending", "error");
         }
       });
     </script>

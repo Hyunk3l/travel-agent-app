@@ -116,6 +116,10 @@ def ask(message: str) -> Dict[str, Any]:
         "hotels": hotels,
         "status": _json_safe(getattr(result, "status", None)),
         "execution_time_ms": getattr(result, "execution_time", None),
+        "execution_order": [
+            getattr(node, "node_id", None)
+            for node in getattr(result, "execution_order", [])
+        ],
         "results": results,
     }
 
