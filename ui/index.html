@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Travel Agent</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600&family=Spectral:wght@500;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #f6f2ec;
+        --bg-accent: #f1e7d9;
+        --ink: #201b16;
+        --muted: #6f6358;
+        --accent: #c05a2e;
+        --card: #fffaf3;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: "Space Grotesk", "Segoe UI", sans-serif;
+        color: var(--ink);
+        background: radial-gradient(circle at top left, #f7e9d2 0%, transparent 45%),
+          radial-gradient(circle at 20% 80%, #f0dfc5 0%, transparent 50%),
+          linear-gradient(140deg, var(--bg) 0%, var(--bg-accent) 100%);
+        min-height: 100vh;
+      }
+
+      .shell {
+        max-width: 980px;
+        margin: 0 auto;
+        padding: 40px 20px 60px;
+      }
+
+      header {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 20px;
+        align-items: center;
+        margin-bottom: 28px;
+      }
+
+      h1 {
+        font-family: "Spectral", serif;
+        font-size: clamp(2rem, 4vw, 3.2rem);
+        margin: 0 0 8px;
+      }
+
+      .tagline {
+        color: var(--muted);
+        font-size: 1rem;
+        max-width: 520px;
+        line-height: 1.5;
+      }
+
+      .status {
+        padding: 10px 16px;
+        border-radius: 999px;
+        border: 1px solid #ead9c7;
+        background: #fff3e6;
+        color: var(--accent);
+        font-weight: 600;
+        font-size: 0.9rem;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 20px;
+      }
+
+      .card {
+        background: var(--card);
+        border-radius: 20px;
+        padding: 22px;
+        box-shadow: 0 18px 40px rgba(32, 27, 22, 0.08);
+        border: 1px solid rgba(192, 90, 46, 0.15);
+      }
+
+      label {
+        font-weight: 600;
+        margin-bottom: 10px;
+        display: block;
+      }
+
+      textarea {
+        width: 100%;
+        min-height: 140px;
+        padding: 14px;
+        border-radius: 14px;
+        border: 1px solid #e7d5c1;
+        font-family: inherit;
+        font-size: 1rem;
+        resize: vertical;
+        background: #fffefb;
+      }
+
+      button {
+        background: var(--accent);
+        color: #fff;
+        border: none;
+        padding: 12px 18px;
+        border-radius: 999px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+      }
+
+      button:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 8px 16px rgba(192, 90, 46, 0.2);
+      }
+
+      .answer {
+        white-space: pre-wrap;
+        line-height: 1.6;
+      }
+
+      .meta {
+        color: var(--muted);
+        font-size: 0.9rem;
+        margin-top: 12px;
+      }
+
+      .chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 10px;
+      }
+
+      .chip {
+        padding: 6px 10px;
+        border-radius: 999px;
+        background: #f7e6d4;
+        color: #7a3e24;
+        font-size: 0.85rem;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="shell">
+      <header>
+        <div>
+          <h1>Local Travel Agent</h1>
+          <p class="tagline">
+            Ask for a quick trip plan. The orchestrator will decide which searches to run and
+            return a combined response.
+          </p>
+        </div>
+        <div class="status" id="status">Ready</div>
+      </header>
+
+      <div class="grid">
+        <section class="card">
+          <label for="prompt">Trip request</label>
+          <textarea id="prompt">SFO to LAX, depart 2025-01-10. Flights only.</textarea>
+          <div style="margin-top: 16px;">
+            <button id="send">Ask agent</button>
+          </div>
+          <div class="chips">
+            <span class="chip">Ollama</span>
+            <span class="chip">Strands graph</span>
+            <span class="chip">Local only</span>
+          </div>
+        </section>
+
+        <section class="card">
+          <label>Response</label>
+          <div class="answer" id="answer">Waiting for a request.</div>
+          <div class="meta" id="meta"></div>
+        </section>
+      </div>
+    </div>
+
+    <script>
+      const statusEl = document.getElementById("status");
+      const answerEl = document.getElementById("answer");
+      const metaEl = document.getElementById("meta");
+      const promptEl = document.getElementById("prompt");
+
+      function setStatus(text) {
+        statusEl.textContent = text;
+      }
+
+      document.getElementById("send").addEventListener("click", async () => {
+        const message = promptEl.value.trim();
+        if (!message) {
+          return;
+        }
+        setStatus("Thinking...");
+        answerEl.textContent = "";
+        metaEl.textContent = "";
+        try {
+          const response = await fetch("/chat", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ message }),
+          });
+          if (!response.ok) {
+            throw new Error(`Request failed with ${response.status}`);
+          }
+          const payload = await response.json();
+          answerEl.textContent = payload.answer || "No response.";
+          const status = payload.status ? `Status: ${payload.status}` : "Status: unknown";
+          const timing = payload.execution_time_ms
+            ? `Time: ${Math.round(payload.execution_time_ms)} ms`
+            : "Time: n/a";
+          metaEl.textContent = `${status} | ${timing}`;
+          setStatus("Ready");
+        } catch (error) {
+          answerEl.textContent = "Error calling the agent.";
+          metaEl.textContent = String(error);
+          setStatus("Error");
+        }
+      });
+    </script>
+  </body>
+</html>

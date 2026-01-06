@@ -47,6 +47,18 @@ You can override the Ollama host or model:
 OLLAMA_HOST=http://localhost:11434 OLLAMA_MODEL=llama3.1 travel-agent --origin SFO --destination LAX --depart 2025-01-10
 ```
 
+## Local UI (FastAPI)
+
+Run the API server:
+
+```bash
+source .venv/bin/activate
+pip install -e .
+OLLAMA_HOST=http://localhost:11434 OLLAMA_MODEL=llama3.1 travel-agent-api
+```
+
+Open `http://127.0.0.1:8000/ui/` in your browser. The static page calls `POST /chat`.
+
 ## What it does
 
 - The orchestrator reads the request, sets flags for which searches to run, and

@@ -8,10 +8,15 @@ version = "0.1.0"
 description = "Travel agent demo using the Strands Graph pattern."
 readme = "README.md"
 requires-python = ">=3.10"
-dependencies = ["strands-agents[ollama]"]
+dependencies = [
+    "strands-agents[ollama]",
+    "fastapi",
+    "uvicorn",
+]
 
 [project.scripts]
 travel-agent = "travel_agent.main:main"
+travel-agent-api = "travel_agent.server:main"
 
 [tool.setuptools]
 package-dir = {"" = "src"}
