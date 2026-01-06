@@ -42,7 +42,7 @@
 
       header {
         display: grid;
-        grid-template-columns: 1fr auto;
+        grid-template-columns: 1fr;
         gap: 20px;
         align-items: center;
         margin-bottom: 28px;
@@ -62,13 +62,40 @@
       }
 
       .status {
-        padding: 10px 16px;
-        border-radius: 999px;
-        border: 1px solid #ead9c7;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 12px;
+        border-radius: 12px;
+        border: 1px dashed #ead9c7;
         background: #fff3e6;
         color: var(--accent);
         font-weight: 600;
         font-size: 0.9rem;
+      }
+
+      .pulse {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--accent);
+        box-shadow: 0 0 0 rgba(192, 90, 46, 0.4);
+        animation: pulse 1.6s infinite;
+      }
+
+      @keyframes pulse {
+        0% {
+          transform: scale(0.9);
+          box-shadow: 0 0 0 0 rgba(192, 90, 46, 0.4);
+        }
+        70% {
+          transform: scale(1);
+          box-shadow: 0 0 0 12px rgba(192, 90, 46, 0);
+        }
+        100% {
+          transform: scale(0.9);
+          box-shadow: 0 0 0 0 rgba(192, 90, 46, 0);
+        }
       }
 
       .grid {
@@ -202,7 +229,6 @@
             return a combined response.
           </p>
         </div>
-        <div class="status" id="status">Ready</div>
       </header>
 
       <div class="grid">
@@ -222,6 +248,10 @@
         <section class="card">
           <label>Response</label>
           <div class="query" id="query">Waiting for a request.</div>
+          <div class="status" id="status" style="display: none;">
+            <span class="pulse"></span>
+            <span id="status-text">Thinking…</span>
+          </div>
           <div class="answer" id="answer"></div>
           <div id="flights"></div>
           <div id="hotels"></div>
@@ -232,6 +262,7 @@
 
     <script>
       const statusEl = document.getElementById("status");
+      const statusTextEl = document.getElementById("status-text");
       const queryEl = document.getElementById("query");
       const answerEl = document.getElementById("answer");
       const metaEl = document.getElementById("meta");
@@ -239,8 +270,13 @@
       const flightsEl = document.getElementById("flights");
       const hotelsEl = document.getElementById("hotels");
 
-      function setStatus(text) {
-        statusEl.textContent = text;
+      function setStatus(text, visible) {
+        if (!visible) {
+          statusEl.style.display = "none";
+          return;
+        }
+        statusTextEl.textContent = text;
+        statusEl.style.display = "inline-flex";
       }
 
       function renderCards(items, type) {
@@ -282,7 +318,7 @@
         if (!message) {
           return;
         }
-        setStatus("Thinking...");
+        setStatus("Thinking…", true);
         const startTime = performance.now();
         answerEl.textContent = "";
         queryEl.textContent = "";
@@ -314,12 +350,12 @@
           const elapsedMs = Math.round(performance.now() - startTime);
           const timing = `Time: ${elapsedMs} ms`;
           metaEl.textContent = `${status} | ${timing}`;
-          setStatus("Ready");
+          setStatus("", false);
         } catch (error) {
           answerEl.textContent = "Error calling the agent.";
           const elapsedMs = Math.round(performance.now() - startTime);
           metaEl.textContent = `${String(error)} | Time: ${elapsedMs} ms`;
-          setStatus("Error");
+          setStatus("There was an error. Please try again.", true);
         }
       });
     </script>
