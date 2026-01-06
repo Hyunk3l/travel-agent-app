@@ -348,13 +348,15 @@
           }
           const status = payload.status ? `Status: ${payload.status}` : "Status: unknown";
           const elapsedMs = Math.round(performance.now() - startTime);
-          const timing = `Time: ${elapsedMs} ms`;
+          const elapsedSec = (elapsedMs / 1000).toFixed(1);
+          const timing = `Time: ${elapsedSec} s`;
           metaEl.textContent = `${status} | ${timing}`;
           setStatus("", false);
         } catch (error) {
           answerEl.textContent = "Error calling the agent.";
           const elapsedMs = Math.round(performance.now() - startTime);
-          metaEl.textContent = `${String(error)} | Time: ${elapsedMs} ms`;
+          const elapsedSec = (elapsedMs / 1000).toFixed(1);
+          metaEl.textContent = `${String(error)} | Time: ${elapsedSec} s`;
           setStatus("There was an error. Please try again.", true);
         }
       });
