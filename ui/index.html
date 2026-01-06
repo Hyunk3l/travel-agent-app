@@ -283,6 +283,7 @@
           return;
         }
         setStatus("Thinking...");
+        const startTime = performance.now();
         answerEl.textContent = "";
         queryEl.textContent = "";
         metaEl.textContent = "";
@@ -310,14 +311,14 @@
             answerEl.textContent = "";
           }
           const status = payload.status ? `Status: ${payload.status}` : "Status: unknown";
-          const timing = payload.execution_time_ms
-            ? `Time: ${Math.round(payload.execution_time_ms)} ms`
-            : "Time: n/a";
+          const elapsedMs = Math.round(performance.now() - startTime);
+          const timing = `Time: ${elapsedMs} ms`;
           metaEl.textContent = `${status} | ${timing}`;
           setStatus("Ready");
         } catch (error) {
           answerEl.textContent = "Error calling the agent.";
-          metaEl.textContent = String(error);
+          const elapsedMs = Math.round(performance.now() - startTime);
+          metaEl.textContent = `${String(error)} | Time: ${elapsedMs} ms`;
           setStatus("Error");
         }
       });
