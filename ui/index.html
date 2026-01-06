@@ -390,22 +390,26 @@
         const cards = items
           .map((item) => {
             if (type === "flight") {
+              const currency = item.currency || "EUR";
+              const price = item.price ?? item.price_usd;
               return `
                 <div class="result-card">
                   <h4>${item.carrier || "Carrier"} <span>${item.flight || ""}</span></h4>
                   <p><span>Route:</span> ${item.route || "—"}</p>
                   <p><span>Depart:</span> ${item.depart || "—"}</p>
                   <p><span>Return:</span> ${item.return || "—"}</p>
-                  <p><span>Price:</span> $${item.price_usd || "—"}</p>
+                  <p><span>Price:</span> ${price || "—"} ${currency}</p>
                 </div>
               `;
             }
+            const currency = item.currency || "EUR";
+            const price = item.price_per_night ?? item.price_usd_per_night;
             return `
               <div class="result-card">
                 <h4>${item.name || "Hotel"}</h4>
                 <p><span>City:</span> ${item.city || "—"}</p>
                 <p><span>Checkout:</span> ${item.checkout || "—"}</p>
-                <p><span>Price:</span> $${item.price_usd_per_night || "—"} / night</p>
+                <p><span>Price:</span> ${price || "—"} ${currency} / night</p>
               </div>
             `;
           })
