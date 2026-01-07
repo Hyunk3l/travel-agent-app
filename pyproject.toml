@@ -14,9 +14,15 @@ dependencies = [
     "uvicorn",
 ]
 
+[project.optional-dependencies]
+dev = ["pytest"]
+
 [project.scripts]
 travel-agent = "travel_agent.main:main"
 travel-agent-api = "travel_agent.server:main"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
 
 [tool.setuptools]
 package-dir = {"" = "src"}

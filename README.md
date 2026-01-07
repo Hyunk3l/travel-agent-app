@@ -34,6 +34,14 @@ pip install -e .
 OLLAMA_HOST=http://localhost:11434 OLLAMA_MODEL=llama3.1 travel-agent --origin SFO --destination LAX --depart 2025-01-10
 ```
 
+## Tests
+
+```bash
+source .venv/bin/activate
+pip install -e '.[dev]'
+pytest
+```
+
 Or install and run:
 
 ```bash
