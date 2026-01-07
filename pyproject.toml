@@ -15,7 +15,10 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["pytest"]
+dev = [
+    "pytest",
+    "jsonschema",
+]
 
 [project.scripts]
 travel-agent = "travel_agent.main:main"
@@ -23,6 +26,7 @@ travel-agent-api = "travel_agent.server:main"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+markers = ["integration: requires local Ollama and is skipped by default"]
 
 [tool.setuptools]
 package-dir = {"" = "src"}

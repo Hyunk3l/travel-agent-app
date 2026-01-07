@@ -42,6 +42,32 @@ pip install -e '.[dev]'
 pytest
 ```
 
+Integration tests (require Ollama running):
+
+```bash
+source .venv/bin/activate
+pip install -e '.[dev]'
+RUN_INTEGRATION=1 pytest tests/integration
+```
+
+## Evaluations
+
+Run a basic evaluation sweep (saves CSV to `evaluation_results/`):
+
+```bash
+source .venv/bin/activate
+pip install -e '.[dev]'
+OLLAMA_HOST=http://localhost:11434 OLLAMA_MODEL=llama3.1 python scripts/evaluate_agents.py
+```
+
+Run an LLM-judge evaluation (saves JSON to `evaluation_results/`):
+
+```bash
+source .venv/bin/activate
+pip install -e '.[dev]'
+EVAL_OLLAMA_HOST=http://localhost:11434 EVAL_MODEL=llama3.1 python scripts/llm_judge.py
+```
+
 Or install and run:
 
 ```bash

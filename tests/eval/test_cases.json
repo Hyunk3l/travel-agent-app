@@ -1,0 +1,20 @@
+[
+  {
+    "id": "trip-basic-1",
+    "query": "Plan a trip from SFO to LAX on 2025-01-10. Flights only.",
+    "expected": "JSON with needs_flight true and needs_hotel false.",
+    "category": "tool-usage"
+  },
+  {
+    "id": "trip-hotel-1",
+    "query": "I need a hotel in Los Angeles for 2025-01-10. No flights.",
+    "expected": "JSON with needs_hotel true and needs_flight false.",
+    "category": "tool-usage"
+  },
+  {
+    "id": "trip-currency-1",
+    "query": "Book flights from BCN to NAP on 2026-02-10, price in USD.",
+    "expected": "Currency USD in output if provided.",
+    "category": "edge-case"
+  }
+]
