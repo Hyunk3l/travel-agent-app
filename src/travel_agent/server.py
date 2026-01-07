@@ -1,6 +1,7 @@
 import json
 import os
 import re
+from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Any, Dict, Optional
 
@@ -11,7 +12,14 @@ from pydantic import BaseModel
 
 from travel_agent.app import build_graph
 
-app = FastAPI()
+@asynccontextmanager
+async def _lifespan(_: FastAPI):
+    global _graph
+    _graph = build_graph()
+    yield
+
+
+app = FastAPI(lifespan=_lifespan)
 
 app.add_middleware(
     CORSMiddleware,
@@ -122,12 +130,6 @@ def ask(message: str) -> Dict[str, Any]:
         ],
         "results": results,
     }
-
-
-@app.on_event("startup")
-def _startup() -> None:
-    global _graph
-    _graph = build_graph()
 
 
 @app.post("/chat")

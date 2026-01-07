@@ -27,6 +27,9 @@ travel-agent-api = "travel_agent.server:main"
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 markers = ["integration: requires local Ollama and is skipped by default"]
+filterwarnings = [
+    "ignore:BeforeModelCallEvent, AfterModelCallEvent, BeforeToolCallEvent, and AfterToolCallEvent are no longer experimental:DeprecationWarning",
+]
 
 [tool.setuptools]
 package-dir = {"" = "src"}
