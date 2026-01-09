@@ -1,5 +1,4 @@
 import Foundation
-import SwiftUI
 
 struct ChatRequest: Encodable {
     let message: String
@@ -71,32 +70,5 @@ struct HotelOption: Decodable, Identifiable {
             return String(format: "%.2f %@", amount, symbol)
         }
         return "—"
-    }
-}
-
-enum NodeState {
-    case idle
-    case running
-    case done
-    case skipped
-    case error
-}
-
-struct NodeStatus {
-    let state: NodeState
-    let label: String
-    var color: Color {
-        switch state {
-        case .idle:
-            return .gray
-        case .running:
-            return .orange
-        case .done:
-            return .green
-        case .skipped:
-            return .gray
-        case .error:
-            return .red
-        }
     }
 }
