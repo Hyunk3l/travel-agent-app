@@ -7,13 +7,13 @@ struct ContentView: View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 24) {
-                    header
+                    hero
                     requestCard
                     responseCard
                 }
                 .padding(.horizontal, 20)
                 .padding(.top, 12)
-                .padding(.bottom, 40)
+                .padding(.bottom, 50)
             }
             .scrollIndicators(.hidden)
             .background(background)
@@ -22,24 +22,44 @@ struct ContentView: View {
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Text("Local")
-                        .font(.caption)
+                        .font(.caption.weight(.semibold))
                         .padding(.vertical, 6)
                         .padding(.horizontal, 10)
-                        .background(Color.orange.opacity(0.15))
+                        .background(Color.orange.opacity(0.18))
                         .cornerRadius(10)
                 }
             }
         }
     }
 
-    private var header: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text("Plan a local trip")
-                .font(.title.bold())
-            Text("Ask the agent for flights and hotels. Everything stays on your machine.")
-                .foregroundColor(.secondary)
+    private var hero: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Plan a local trip")
+                        .font(.largeTitle.weight(.bold))
+                    Text("Flights + hotels, crafted by your on-device agent.")
+                        .foregroundColor(.secondary)
+                }
+                Spacer()
+                HeroBadge()
+            }
+            HStack(spacing: 12) {
+                HeroStat(title: "Latency", value: viewModel.isLoading ? "..." : "Fast")
+                HeroStat(title: "Privacy", value: "Local")
+                HeroStat(title: "Model", value: "Ollama")
+            }
         }
+        .padding(24)
         .frame(maxWidth: .infinity, alignment: .leading)
+        .background(
+            RoundedRectangle(cornerRadius: 28)
+                .fill(.ultraThinMaterial)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 28)
+                        .stroke(Color.white.opacity(0.2), lineWidth: 1)
+                )
+        )
     }
 
     private var requestCard: some View {
@@ -55,15 +75,15 @@ struct ContentView: View {
                             .padding(.leading, 6)
                     }
                     TextEditor(text: $viewModel.message)
-                        .frame(minHeight: 140)
+                        .frame(minHeight: 150)
                         .padding(6)
                         .background(Color.clear)
                 }
                 .padding(8)
                 .background(Color(.systemBackground))
                 .overlay(
-                    RoundedRectangle(cornerRadius: 14)
-                        .stroke(Color.orange.opacity(0.25), lineWidth: 1)
+                    RoundedRectangle(cornerRadius: 16)
+                        .stroke(Color.orange.opacity(0.2), lineWidth: 1)
                 )
 
                 Button(action: viewModel.send) {
@@ -128,11 +148,19 @@ struct ContentView: View {
     }
 
     private var background: some View {
-        LinearGradient(
-            colors: [Color.orange.opacity(0.2), Color(.systemGroupedBackground)],
-            startPoint: .topLeading,
-            endPoint: .bottomTrailing
-        )
+        ZStack {
+            LinearGradient(
+                colors: [Color.orange.opacity(0.25), Color(.systemGroupedBackground)],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+            RadialGradient(
+                colors: [Color.white.opacity(0.4), Color.clear],
+                center: .topTrailing,
+                startRadius: 40,
+                endRadius: 320
+            )
+        }
         .ignoresSafeArea()
     }
 }
@@ -199,21 +227,27 @@ private struct FlightCard: View {
     let flight: FlightOption
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Text("\(flight.carrier) \(flight.flight)")
-                .font(.subheadline.weight(.semibold))
-            Text("Route: \(flight.route)")
-                .foregroundColor(.secondary)
-            Text("Depart: \(flight.depart)")
-                .foregroundColor(.secondary)
-            Text("Return: \(flight.returnDate)")
-                .foregroundColor(.secondary)
-            Text("Price: \(flight.priceString)")
-                .font(.subheadline)
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("\(flight.carrier) \(flight.flight)")
+                        .font(.subheadline.weight(.semibold))
+                    Text("Route: \(flight.route)")
+                        .foregroundColor(.secondary)
+                }
+                Spacer()
+                PricePill(text: flight.priceString)
+            }
+            Divider().opacity(0.2)
+            HStack {
+                TripMeta(label: "Depart", value: flight.depart)
+                Spacer()
+                TripMeta(label: "Return", value: flight.returnDate)
+            }
         }
-        .padding(12)
+        .padding(14)
         .background(Color.orange.opacity(0.08))
-        .cornerRadius(12)
+        .cornerRadius(14)
     }
 }
 
@@ -221,18 +255,83 @@ private struct HotelCard: View {
     let hotel: HotelOption
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Text(hotel.name)
-                .font(.subheadline.weight(.semibold))
-            Text("City: \(hotel.city)")
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(hotel.name)
+                        .font(.subheadline.weight(.semibold))
+                    Text(hotel.city)
+                        .foregroundColor(.secondary)
+                }
+                Spacer()
+                PricePill(text: hotel.priceString + " / night")
+            }
+            Divider().opacity(0.2)
+            TripMeta(label: "Checkout", value: hotel.checkout)
+        }
+        .padding(14)
+        .background(Color.orange.opacity(0.08))
+        .cornerRadius(14)
+    }
+}
+
+private struct PricePill: View {
+    let text: String
+
+    var body: some View {
+        Text(text)
+            .font(.caption.weight(.semibold))
+            .padding(.vertical, 6)
+            .padding(.horizontal, 10)
+            .background(Color.orange.opacity(0.2))
+            .cornerRadius(999)
+    }
+}
+
+private struct TripMeta: View {
+    let label: String
+    let value: String
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Text(label)
+                .font(.caption)
                 .foregroundColor(.secondary)
-            Text("Checkout: \(hotel.checkout)")
-                .foregroundColor(.secondary)
-            Text("Price: \(hotel.priceString) / night")
+            Text(value)
                 .font(.subheadline)
         }
-        .padding(12)
-        .background(Color.orange.opacity(0.08))
-        .cornerRadius(12)
+    }
+}
+
+private struct HeroBadge: View {
+    var body: some View {
+        VStack(spacing: 6) {
+            Image(systemName: "sparkles")
+                .font(.title3)
+            Text("AI")
+                .font(.caption.weight(.bold))
+        }
+        .padding(10)
+        .background(Color.orange.opacity(0.2))
+        .clipShape(Circle())
+    }
+}
+
+private struct HeroStat: View {
+    let title: String
+    let value: String
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(title)
+                .font(.caption)
+                .foregroundColor(.secondary)
+            Text(value)
+                .font(.subheadline.weight(.semibold))
+        }
+        .padding(10)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color.white.opacity(0.35))
+        .cornerRadius(14)
     }
 }
