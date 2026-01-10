@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - master
+      - main
   pull_request:
   workflow_dispatch:
     inputs:
@@ -33,7 +34,7 @@ jobs:
 
   integration:
     runs-on: ubuntu-latest
-    if: ${{ github.event_name == 'workflow_dispatch' && inputs.run_integration == 'true' }}
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.run_integration == 'true' || github.event_name != 'workflow_dispatch' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
