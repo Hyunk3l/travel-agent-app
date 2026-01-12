@@ -68,6 +68,10 @@ pip install -e '.[dev]'
 EVAL_OLLAMA_HOST=http://localhost:11434 EVAL_MODEL=llama3.1 python scripts/llm_judge.py
 ```
 
+## Eval SOP (Strands Evals SDK)
+
+To run the Eval SOP workflow (Plan → Data → Eval → Report), see `eval/README.md`.
+
 Or install and run:
 
 ```bash

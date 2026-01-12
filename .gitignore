@@ -1,3 +1,10 @@
 .idea
 **/**.egg-info/
 **/__pycache__/
+.venv/
+.pytest_cache/
+evaluation_results/
+eval/results/
+eval/eval-plan.md
+eval/test-cases.jsonl
+eval/eval-report.md
