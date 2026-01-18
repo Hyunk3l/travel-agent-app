@@ -17,3 +17,6 @@ Out of scope:
 - Agents must be deployable using AWS CDK and AWS AgentCore
 - The three agents must (flight, hotel and orchestrator) have 3 different directories
 - Each agent must have a Dockerfile
+- All the code must be tested
+- Remember to clean up old files
+- Update the README once done
