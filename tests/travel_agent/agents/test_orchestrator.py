@@ -1,4 +1,4 @@
-from travel_agent.agents import OrchestratorAgent
+from orchestrator_agent import OrchestratorAgent
 
 
 def test_orchestrator_prompt_contract():

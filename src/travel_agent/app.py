@@ -6,7 +6,9 @@ from strands.multiagent import GraphBuilder
 from strands.multiagent.graph import GraphState
 from strands.models.ollama import OllamaModel
 
-from travel_agent.agents import FlightSearchAgent, HotelSearchAgent, OrchestratorAgent
+from flight_agent import FlightSearchAgent
+from hotel_agent import HotelSearchAgent
+from orchestrator_agent import OrchestratorAgent
 
 
 def _extract_text(node_result: Any) -> str:

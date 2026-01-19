@@ -1,4 +1,4 @@
-from travel_agent.agents import HotelSearchAgent
+from hotel_agent import HotelSearchAgent
 
 
 def test_hotel_search_prompt_contract():

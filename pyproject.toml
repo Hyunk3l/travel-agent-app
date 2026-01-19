@@ -18,6 +18,8 @@ dependencies = [
 dev = [
     "pytest",
     "jsonschema",
+    "aws-cdk-lib",
+    "constructs",
 ]
 
 [project.scripts]

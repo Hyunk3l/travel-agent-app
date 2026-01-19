@@ -1,4 +1,4 @@
-from travel_agent.agents import FlightSearchAgent
+from flight_agent import FlightSearchAgent
 
 
 def test_flight_search_prompt_contract():

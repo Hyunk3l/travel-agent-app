@@ -119,5 +119,33 @@ Notes:
 ## Project layout
 
 - `src/travel_agent/app.py`: graph wiring (Strands GraphBuilder)
-- `src/travel_agent/agents.py`: three agents (orchestrator, flight, hotel)
+- `src/flight_agent/agent.py`: flight search agent prompt
+- `src/hotel_agent/agent.py`: hotel search agent prompt
+- `src/orchestrator_agent/agent.py`: orchestrator agent prompt
 - `src/travel_agent/main.py`: CLI entry point
+- `src/agent_runtime/server.py`: shared HTTP runtime for AgentCore containers
+- `agents/`: per-agent Dockerfiles
+- `infra/`: CDK app for AgentCore deployment
+
+## AgentCore deployment (AWS CDK)
+
+Each agent has its own Dockerfile under `agents/`. Build images from the repo
+root so the Dockerfiles can copy the shared source tree.
+
+```bash
+docker build -f agents/orchestrator/Dockerfile -t travel-orchestrator .
+docker build -f agents/flight/Dockerfile -t travel-flight .
+docker build -f agents/hotel/Dockerfile -t travel-hotel .
+```
+
+The CDK app under `infra/` builds the same images and defines three AgentCore
+resources (one per agent).
+
+```bash
+cd infra
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+cdk synth
+cdk deploy
+```
