@@ -7,17 +7,17 @@ name = "travel-agent"
 version = "0.1.0"
 description = "Travel agent demo using the Strands Graph pattern."
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.14"
 dependencies = [
-    "strands-agents[ollama]",
-    "fastapi",
-    "uvicorn",
+    "strands-agents[ollama]>=1.22.0",
+    "fastapi>=0.128.0",
+    "uvicorn>=0.40.0",
 ]
 
 [project.optional-dependencies]
 dev = [
-    "pytest",
-    "jsonschema",
+    "pytest>=9.0.2",
+    "jsonschema>=4.26.0",
 ]
 
 [project.scripts]
